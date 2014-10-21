@@ -293,7 +293,7 @@ cccomp cccomp
 	.out(cccomp_out)
 );
 
-assign BEN = opcomp_out & cccomp_out & (|xm_pc_out);
+assign BEN = opcomp_out & cccomp_out;
 assign data_mem_read		= xm_ctr_out.data_mem_read;
 assign data_mem_write	= xm_ctr_out.data_mem_write;
 
