@@ -22,7 +22,7 @@ module cache_datapath
 		input lc3b_word mem_address,
 		input mem_read, mem_write,
 		input lc3b_mem_wmask mem_byte_enable,
-		input lc3b_cache_line pmem_rdata,
+		input lc3b_cache_line arb_mem_rdata,
 		
 		/* output signals */
 		output logic hit,  
@@ -34,8 +34,8 @@ module cache_datapath
 				 vba0_out,
 				 vba1_out,
 		output lc3b_word mem_rdata,
-		output lc3b_cache_line pmem_wdata,
-		output lc3b_word pmem_address
+		output lc3b_cache_line arb_mem_wdata,
+		output lc3b_word arb_mem_address
 );
 
 /* Internal signals */
@@ -154,7 +154,7 @@ mux2 #(.width(128)) dawmux
 (
 	.sel(dawmux_sel),
 	.a(data_write),
-	.b(pmem_rdata),
+	.b(arb_mem_rdata),
 	.f(dawmux_out)
 );
 
@@ -188,11 +188,11 @@ mux4 #(.width(16)) addrmux
 	.b({ta0_out, mem_address[6:0]}),
 	.c({ta1_out, mem_address[6:0]}),
 	.d(16'b0),
-	.f(pmem_address)
+	.f(arb_mem_address)
 );
 
 assign hit = (vba0_out && comp0_out) | (vba1_out && comp1_out);
-assign pmem_wdata = datamux_out;
+assign arb_mem_wdata = datamux_out;
 
 endmodule: cache_datapath
 							 

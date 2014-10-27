@@ -14,7 +14,7 @@ module cache_control
 			dba1_out,
 			vba0_out,
 			vba1_out,
-			pmem_resp,
+			arb_mem_resp,
 			
 	output logic va0_w, va1_w, 		// valid bit array load signals
 					 ta0_w, ta1_w, 		// tag array load signals
@@ -25,8 +25,8 @@ module cache_control
 					 dba_in,		
 					 datamux_sel,		
 					 dawmux_sel,
-					 pmem_read,
-					 pmem_write,
+					 arb_mem_read,
+					 arb_mem_write,
 					 mem_resp,
 					 
 	 output lc3b_mux4sel addrmux_sel
@@ -56,8 +56,8 @@ begin: state_actions
 	dba_in = 1'b0;
 	datamux_sel = 1'b0;	
 	dawmux_sel = 1'b0;
-	pmem_read = 1'b0;
-	pmem_write = 1'b0;
+	arb_mem_read = 1'b0;
+	arb_mem_write = 1'b0;
 	mem_resp = 1'b0;
 	addrmux_sel = 2'b00;
 	
@@ -104,11 +104,11 @@ begin: state_actions
 				addrmux_sel = 2'b10;
 			else
 				addrmux_sel = 2'b01;
-			pmem_write = 1;
+			arb_mem_write = 1;
 		end
 		
 		allocate1: begin
-			pmem_read = 1;				// write cache line from pmem into way based on LRU bit
+			arb_mem_read = 1;				// write cache line from pmem into way based on LRU bit
 			dawmux_sel = 1;			// update tag array, valid bit an clear dirty bit
 			dba_in = 0;
 				if (lru_out) begin
@@ -156,9 +156,9 @@ begin : next_state_logic
 			end
 		end
 		
-		write_back: if (pmem_resp) next_state = allocate1;
+		write_back: if (arb_mem_resp) next_state = allocate1;
 		
-		allocate1: if (pmem_resp) next_state = allocate2;
+		allocate1: if (arb_mem_resp) next_state = allocate2;
 		
 		allocate2: next_state = tag_comp;
 		
