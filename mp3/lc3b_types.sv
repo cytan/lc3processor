@@ -17,8 +17,13 @@ typedef logic  [1:0] lc3b_mem_wmask;
 /* cache types */
 typedef logic  [2:0] lc3b_c_index;
 typedef logic  [2:0] lc3b_c_offset;
-typedef logic  [8:0]	lc3b_c_tag;
-typedef logic  [127:0]	lc3b_c_line;
+typedef logic  [8:0]	lc3b_cache_tag;
+typedef logic  [127:0]	lc3b_cache_line;
+
+/*mux select signals*/
+typedef logic 	[1:0] lc3b_mux4sel;
+typedef logic  [2:0] lc3b_mux8sel;
+typedef logic  [2:0] lc3b_dec3sel;
 
 typedef enum bit [3:0] {
     op_add  = 4'b0001,
