@@ -4,7 +4,8 @@ timeunit 1ns;
 timeprecision 1ns;
 
 logic clk;
-logic mem_resp;
+logic inst_mem_resp;
+logic data_mem_resp;
 logic inst_mem_read;
 logic data_mem_read;
 logic inst_mem_write;
@@ -25,7 +26,8 @@ always #5 clk = ~clk;
 mp3 dut
 (
     .clk,
-    .mem_resp,
+    .inst_mem_resp,
+	 .data_mem_resp,
     .inst_mem_rdata,
 	 .data_mem_rdata,
     .inst_mem_read,
@@ -53,7 +55,8 @@ memory memory
 	 .d_address(data_mem_addr),
     .i_wdata(inst_mem_wdata),
 	 .d_wdata(data_mem_wdata),
-    .resp(mem_resp),
+    .i_resp(inst_mem_resp),
+	 .d_resp(data_mem_resp),
     .i_rdata(inst_mem_rdata),
 	 .d_rdata(data_mem_rdata)
 );

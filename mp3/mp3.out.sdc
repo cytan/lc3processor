@@ -19,7 +19,7 @@
 ## PROGRAM "Quartus II"
 ## VERSION "Version 13.1.4 Build 182 03/12/2014 SJ Full Version"
 
-## DATE    "Fri Oct 17 13:03:29 2014"
+## DATE    "Sun Oct 26 16:20:53 2014"
 
 ##
 ## DEVICE  "EP3SE50F780C2"
@@ -84,6 +84,7 @@ set_input_delay -add_delay  -clock [get_clocks {clk}]  0.000 [get_ports {data_me
 set_input_delay -add_delay  -clock [get_clocks {clk}]  0.000 [get_ports {data_mem_rdata[13]}]
 set_input_delay -add_delay  -clock [get_clocks {clk}]  0.000 [get_ports {data_mem_rdata[14]}]
 set_input_delay -add_delay  -clock [get_clocks {clk}]  0.000 [get_ports {data_mem_rdata[15]}]
+set_input_delay -add_delay  -clock [get_clocks {clk}]  0.000 [get_ports {data_mem_resp}]
 set_input_delay -add_delay  -clock [get_clocks {clk}]  0.000 [get_ports {inst_mem_rdata[0]}]
 set_input_delay -add_delay  -clock [get_clocks {clk}]  0.000 [get_ports {inst_mem_rdata[1]}]
 set_input_delay -add_delay  -clock [get_clocks {clk}]  0.000 [get_ports {inst_mem_rdata[2]}]
@@ -100,7 +101,7 @@ set_input_delay -add_delay  -clock [get_clocks {clk}]  0.000 [get_ports {inst_me
 set_input_delay -add_delay  -clock [get_clocks {clk}]  0.000 [get_ports {inst_mem_rdata[13]}]
 set_input_delay -add_delay  -clock [get_clocks {clk}]  0.000 [get_ports {inst_mem_rdata[14]}]
 set_input_delay -add_delay  -clock [get_clocks {clk}]  0.000 [get_ports {inst_mem_rdata[15]}]
-set_input_delay -add_delay  -clock [get_clocks {clk}]  0.000 [get_ports {mem_resp}]
+set_input_delay -add_delay  -clock [get_clocks {clk}]  0.000 [get_ports {inst_mem_resp}]
 
 
 #**************************************************************

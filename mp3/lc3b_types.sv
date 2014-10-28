@@ -3,6 +3,7 @@ package lc3b_types;
 typedef logic [15:0] lc3b_word;
 typedef logic  [7:0] lc3b_byte;
 typedef logic  [1:0]	lc3b_2bit;
+typedef logic	[2:0] lc3b_3bit;
 
 typedef logic [10:0] lc3b_offset11;
 typedef logic  [8:0] lc3b_offset9;
@@ -57,11 +58,15 @@ typedef enum bit [3:0] {
 /* control word */
 typedef struct packed {
 	logic			id_storemux_sel;
-	lc3b_2bit	ex_alumux_sel;
+	lc3b_3bit	ex_alumux_sel;
 	lc3b_aluop	ex_aluop;
 	logic			data_mem_read;
+	logic			data_mem_readi;
 	logic  		data_mem_write;
-	logic 		wb_regfile_sel;
+	logic			data_mem_writei;
+	logic			mem_jinst;
+	logic			mem_rdatamux_sel;
+	lc3b_2bit	wb_regfile_sel;
 	logic 		wb_load_cc;
 	logic 		wb_destmux_sel;
 	logic 		wb_load_regfile;

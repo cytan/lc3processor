@@ -19,7 +19,8 @@ module memory
 (
 	// common signal
 	input clk,
-	output logic 	resp,
+	output logic 	i_resp,
+	output logic	d_resp,
 	// instruction memory
 	input i_read,
 	input i_write,
@@ -81,6 +82,7 @@ end
 /* Magic memory responds immediately */
 assign i_rdata = {mem[i_even_address+1], mem[i_even_address]};
 assign d_rdata = {mem[d_even_address+1], mem[d_even_address]};
-assign resp = i_read | d_read | i_write | d_write;
+assign i_resp = i_read | i_write;
+assign d_resp = d_read | d_write;
 
 endmodule : memory

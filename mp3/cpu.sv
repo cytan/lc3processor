@@ -4,7 +4,8 @@ module cpu
 (
 	input clk,
    /* Memory signals */
-	input	mem_resp,
+	input	inst_mem_resp,
+	input data_mem_resp,
    input	lc3b_word inst_mem_rdata,
 	input	lc3b_word data_mem_rdata,
    output logic	inst_mem_read,
@@ -21,11 +22,16 @@ module cpu
 
 /* internal signals */
 logic				BEN;
+logic				load_pipeline;
 logic				load_pc;
 logic				load_fd;
 logic				load_dx;
 logic				load_xm;
 logic				load_mw;
+logic				direct;
+logic				indirect;
+logic				stall_out;
+logic				stall_outbar;
 logic				opcomp_out;
 logic				cccomp_out;
 lc3b_nzp			cc_out;
@@ -47,16 +53,28 @@ lc3b_word		dx_ir_out;
 lc3b_word		adj6_out;
 lc3b_word		sext5_out;
 lc3b_word		sext6_out;
+lc3b_word		zext4_out;
 lc3b_word		alumux_out;
 lc3b_word		alu_out;
+lc3b_word		xm_sr1_out;
 lc3b_word		xm_sr2_out;
 lc3b_word		xm_pc_out;
 lc3b_word		xm_ir_out;
+lc3b_word		xm_alu_out;
+lc3b_word		hlbyte_out;
+lc3b_word		rdatamux_out;
+lc3b_word		zdj8_out;
 lc3b_word		adj9_out;
+lc3b_word		adj11_out;
+lc3b_word		jsradder_out;
+lc3b_word		jsrmux_out;
+lc3b_word		trapmux_out;
 lc3b_word		mw_rdata_out;
 lc3b_word		mw_alu_out;
+lc3b_word		mw_lea_out;
 lc3b_word		mw_pc_out;
 lc3b_word		mw_ir_out;
+lc3b_word		iaddr_out;
 
 
 lc3b_control_word		rom_out;
@@ -64,23 +82,88 @@ lc3b_control_word		dx_ctr_out;
 lc3b_control_word		xm_ctr_out;
 lc3b_control_word		mw_ctr_out;
 
-
-/* set signals */
-assign load_pc	= 1;
-assign load_fd = 1;
-assign load_dx	= 1;
-assign load_xm = 1;
-assign load_mw	= 1;
+/* * * * * * * * * * * * * * * */
+/* Control flow and stall unit */
+/*   handles p-mem interface   */
+/* * * * * * * * * * * * * * * */
+assign load_pc	= load_pipeline;
+assign load_fd = load_pipeline;
+assign load_dx	= load_pipeline;
+assign load_xm = load_pipeline;
+assign load_mw	= load_pipeline;
+assign inst_mem_byte_enable = 2'b00;
 assign inst_mem_write = 0;
-assign inst_mem_read	= load_pc;
-assign data_mem_byte_enable = 2'b11;
+assign inst_mem_wdata = 16'b0;
+assign inst_mem_read	= 1;
+assign stall_outbar = ~stall_out;
 
-/* PC unit */
-mux2 pcmux
+assign direct		= (xm_ir_out[15]^1'b1) & (xm_ir_out[13]^1'b0);	// non-indirect load/stores have opcode 0x1x
+assign indirect 	= &(xm_ir_out[15:13] ^ 3'b010);		// 3'b101 signifies indirect instructions
+assign load_pipeline	= inst_mem_resp & (~(indirect&(~(stall_out & data_mem_resp)))) & (~(direct&(~data_mem_resp)));
+
+register #(.width(1))	stallreg		///////////////////////////////
 (
-	.sel(BEN),
+	.clk,
+	.load(data_mem_resp & indirect),
+	.in(stall_outbar),
+	.out(stall_out)
+);
+
+mux2 #(.width(1))		dreadmux
+(
+	.sel(stall_out),
+	.a(xm_ctr_out.data_mem_read),
+	.b(xm_ctr_out.data_mem_readi),
+	.f(data_mem_read)
+);
+
+mux2 #(.width(1))		dwritemux
+(
+	.sel(stall_out),
+	.a(xm_ctr_out.data_mem_write),
+	.b(xm_ctr_out.data_mem_writei),
+	.f(data_mem_write)
+);
+
+register #(.width(16))	iaddr	///////////////////////////
+(
+	.clk,
+	.load(stall_outbar),
+	.in(data_mem_rdata),
+	.out(iaddr_out)
+);
+
+mux4 #(.width(16))	daddrmux
+(
+	.sel({&(xm_ir_out[15:12]), stall_out}),
+	.a(xm_alu_out),
+	.b(iaddr_out),
+	.c(zdj8_out),
+	.d(zdj8_out),
+	.f(data_mem_addr)
+);
+
+
+mux4 #(.width(2)) mbemux
+(
+	.sel({(xm_ir_out[15]^xm_ir_out[14]), xm_alu_out[0]}),
+	.a(2'b01),
+	.b(2'b10),
+	.c(2'b11),
+	.d(2'b11),
+	.f(data_mem_byte_enable)
+);
+
+/* * * * * */
+/* PC unit */
+/* * * * * */
+mux4 pcmux
+(
+	.sel({BEN,xm_ctr_out.mem_jinst}),
 	.a(pcplus2_out),
-	.b(bradder_out),
+	.b(trapmux_out),
+	.c(bradder_out),
+	.d(bradder_out),
 	.f(pcmux_out)
 );
 
@@ -98,7 +181,9 @@ plus2 pcplus2
 	.out(pcplus2_out)
 );
 
-/* IF-ID registers*/
+/* * * * * * * * * */
+/* IF-ID registers */
+/* * * * * * * * * */
 register fd_pc
 (
 	.clk,
@@ -115,7 +200,9 @@ register fd_ir
 	.out(fd_ir_out)
 );
 
+/* * * * * * * * * * */
 /* decode stage unit */
+/* * * * * * * * * * */
 mux2 #(.width(3)) destmux
 (
 	.sel(mw_ctr_out.wb_destmux_sel),
@@ -150,7 +237,9 @@ control_rom	rom
 	.out(rom_out)
 );
 
+/* * * * * * * * * */
 /* ID-EX registers */
+/* * * * * * * * * */
 register dx_sr1
 (
 	.clk,
@@ -167,7 +256,7 @@ register dx_sr2
 	.out(dx_sr2_out)
 );
 
-register #(.width(13)) dx_ctr
+register #(.width($bits(lc3b_control_word))) dx_ctr
 (
 	.clk,
 	.load(load_dx),
@@ -191,7 +280,9 @@ register dx_ir
 	.out(dx_ir_out)
 );
 
-/* execute stage unit */
+/* * * * * * * * * * * */
+/* execute stage unit  */
+/* * * * * * * * * * * */
 adj #(.width(6)) adj6
 (
 	.in(dx_ir_out[5:0]),
@@ -210,13 +301,23 @@ sext #(.width(6)) sext6
 	.out(sext6_out)
 );
 
-mux4 alumux
+zext zext4
+(
+	.in(dx_ir_out[3:0]),
+	.out(zext4_out)
+);
+
+mux8 alumux
 (
 	.sel(dx_ctr_out.ex_alumux_sel),
 	.a(dx_sr2_out),
 	.b(adj6_out),
 	.c(sext5_out),
 	.d(sext6_out),
+	.h(zext4_out),
+	.i(zext4_out),
+	.j(zext4_out),
+	.k(zext4_out),
 	.f(alumux_out)
 );
 
@@ -228,7 +329,17 @@ alu alu
 	.f(alu_out)
 );
 
-/* EX-MEM registers */
+/* * * * * * * * * * */
+/* EX-MEM registers  */
+/* * * * * * * * * * */
+register xm_sr1
+(
+	.clk,
+	.load(load_xm),
+	.in(dx_sr1_out),
+	.out(xm_sr1_out)
+);
+
 register xm_sr2
 (
 	.clk,
@@ -242,10 +353,10 @@ register xm_alu
 	.clk,
 	.load(load_xm),
 	.in(alu_out),
-	.out(data_mem_addr)
+	.out(xm_alu_out)
 );
 
-register #(.width(13)) xm_ctr
+register #(.width($bits(lc3b_control_word))) xm_ctr
 (
 	.clk,
 	.load(load_xm),
@@ -269,14 +380,21 @@ register xm_ir
 	.out(xm_ir_out)
 );
 
-/* memory stage unit*/
-
+/* * * * * * * * * * */
+/* memory stage unit */
+/* * * * * * * * * * */
 mux2 wdatamux
 (
-	.sel(data_mem_addr[0]),
+	.sel(xm_alu_out[0]),
 	.a(xm_sr2_out),
 	.b({xm_sr2_out[7:0],8'b00000000}),
 	.f(data_mem_wdata)
+);
+
+zdj zdj8
+(
+	.in(xm_ir_out[7:0]),
+	.out(zdj8_out)
 );
 
 comparator #(.width(4)) opcomp
@@ -294,8 +412,6 @@ cccomp cccomp
 );
 
 assign BEN = opcomp_out & cccomp_out;
-assign data_mem_read		= xm_ctr_out.data_mem_read;
-assign data_mem_write	= xm_ctr_out.data_mem_write;
 
 adj #(.width(9)) adj9
 (
@@ -310,12 +426,58 @@ adder2 bradder
 	.f(bradder_out)
 );
 
-/* MEM-WB registers */
+adj #(.width(11)) adj11
+(
+	.in(xm_ir_out[10:0]),
+	.out(adj11_out)
+);
+
+adder2 jsradder
+(
+	.a(xm_pc_out),
+	.b(adj11_out),
+	.f(jsradder_out)
+);
+
+mux2 jsrmux
+(
+	.sel(xm_ir_out[11]),
+	.a(xm_sr1_out),
+	.b(jsradder_out),
+	.f(jsrmux_out)
+);
+
+mux2 trapmux
+(
+	.sel(&(xm_ir_out[15:12])),
+	.a(jsrmux_out),
+	.b(data_mem_rdata),
+	.f(trapmux_out)
+);
+
+hlbyte hlbyte
+(
+	.in(data_mem_rdata),
+	.hl(xm_alu_out[0]),
+	.out(hlbyte_out)
+);
+
+mux2 rdatamux
+(
+	.sel(xm_ctr_out.mem_rdatamux_sel),
+	.a(data_mem_rdata),
+	.b(hlbyte_out),
+	.f(rdatamux_out)
+);
+
+/* * * * * * * * * * */
+/* MEM-WB registers  */
+/* * * * * * * * * * */
 register mw_rdata
 (
 	.clk,
 	.load(load_mw),
-	.in(data_mem_rdata),
+	.in(rdatamux_out),
 	.out(mw_rdata_out)
 );
 
@@ -323,11 +485,19 @@ register mw_alu
 (
 	.clk,
 	.load(load_mw),
-	.in(data_mem_addr),
+	.in(xm_alu_out),
 	.out(mw_alu_out)
 );
 
-register #(.width(13)) mw_ctr
+register mw_lea
+(
+	.clk,
+	.load(load_mw),
+	.in(bradder_out),
+	.out(mw_lea_out)
+);
+
+register #(.width($bits(lc3b_control_word))) mw_ctr
 (
 	.clk,
 	.load(load_mw),
@@ -351,12 +521,16 @@ register mw_ir
 	.out(mw_ir_out)
 );
 
-/* writeback stage unit */
-mux2 regfilemux
+/* * * * * * * * * * * * */
+/* writeback stage unit  */
+/* * * * * * * * * * * * */
+mux4 regfilemux
 (
 	.sel(mw_ctr_out.wb_regfile_sel),
-	.a(mw_alu_out),
-	.b(mw_rdata_out),
+	.a(mw_rdata_out),
+	.b(mw_alu_out),
+	.c(mw_lea_out),
+	.d(mw_pc_out),
 	.f(wb_regfile_in)
 );
 

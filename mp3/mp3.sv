@@ -5,7 +5,8 @@ module mp3
     input clk,
 
     /* Memory signals */
-    input	mem_resp,
+    input	inst_mem_resp,
+	 input	data_mem_resp,
     input	lc3b_word inst_mem_rdata,
 	 input	lc3b_word data_mem_rdata,
     output logic	inst_mem_read,
@@ -28,7 +29,8 @@ module mp3
 cpu CPU
 (
 	.clk,
-	.mem_resp,
+	.inst_mem_resp,
+	.data_mem_resp,
 	.inst_mem_rdata,
 	.data_mem_rdata,
 	.inst_mem_read,
