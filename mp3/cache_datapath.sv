@@ -165,10 +165,10 @@ mux8 #(.width(16)) c_line_2_word
 	.b(datamux_out[31:16]),
 	.c(datamux_out[47:32]),
 	.d(datamux_out[63:48]),
-	.e(datamux_out[79:64]),
-	.f1(datamux_out[95:80]),
-	.g(datamux_out[111:96]),
-	.h(datamux_out[127:112]),
+	.h(datamux_out[79:64]),
+	.i(datamux_out[95:80]),
+	.j(datamux_out[111:96]),
+	.k(datamux_out[127:112]),
 	.f(mem_rdata)
 );
 

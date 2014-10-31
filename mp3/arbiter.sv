@@ -47,7 +47,7 @@ mux2 #(.width(1)) readmux
 	.sel(readmux_sel),
 	.a(i_arb_mem_read),
 	.b(d_arb_mem_read),
-	.f(l2arb_mem_address)
+	.f(l2arb_mem_read)
 );
 
 mux2 #(.width(1)) writemux
@@ -55,7 +55,7 @@ mux2 #(.width(1)) writemux
 	.sel(writemux_sel),
 	.a(1'b0),
 	.b(d_arb_mem_write),
-	.f(l2arb_mem_address)
+	.f(l2arb_mem_write)
 );
 
 mux2 #(.width(128)) wdatamux
@@ -63,7 +63,7 @@ mux2 #(.width(128)) wdatamux
 	.sel(wdatamux_sel),
 	.a(128'b0),
 	.b(d_arb_mem_wdata),
-	.f(l2arb_mem_address)
+	.f(l2arb_mem_wdata)
 );
 
 demux2 #(.width(128)) rdatademux
