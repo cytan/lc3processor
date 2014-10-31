@@ -86,7 +86,7 @@ lc3b_control_word		mw_ctr_out;
 /* Control flow and stall unit */
 /*   handles p-mem interface   */
 /* * * * * * * * * * * * * * * */
-assign load_pc	= load_pipeline;
+assign load_pc	= load_pipeline; 
 assign load_fd = load_pipeline;
 assign load_dx	= load_pipeline;
 assign load_xm = load_pipeline;
@@ -97,7 +97,7 @@ assign inst_mem_wdata = 16'b0;
 assign inst_mem_read	= 1;
 assign stall_outbar = ~stall_out;
 
-assign direct		= (xm_ir_out[15]^1'b1) & (xm_ir_out[13]^1'b0);	// non-indirect load/stores have opcode 0x1x
+assign direct		= ((xm_ir_out[15]^1'b1) & (xm_ir_out[13]^1'b0)) | (&xm_ir_out[15:12]);	// non-indirect load/stores have opcode 0x1x
 assign indirect 	= &(xm_ir_out[15:13] ^ 3'b010);		// 3'b101 signifies indirect instructions
 assign load_pipeline	= inst_mem_resp & (~(indirect&(~(stall_out & data_mem_resp)))) & (~(direct&(~data_mem_resp)));
 
