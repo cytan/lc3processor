@@ -39,7 +39,12 @@ lc3b_word 					icache_mem_address;
 lc3b_word					dcache_mem_address;
 lc3b_cache_line				icache_mem_wdata;
 lc3b_cache_line				dcache_mem_wdata;
-
+lc3b_word				l2arb_mem_address;
+logic						l2arb_mem_read;
+logic						l2arb_mem_write;
+logic 					l2arb_mem_resp;
+lc3b_cache_line		l2arb_mem_wdata;
+lc3b_cache_line		l2arb_mem_rdata;
 
 
 /* Instantiate MP3 top level blocks here 
@@ -119,14 +124,34 @@ arbiter dut_arbiter
 	.d_arb_mem_resp(dcache_mem_resp),
 	
 	/*l2 cache signals*/
-	.l2arb_mem_address(address),
-	.l2arb_mem_read(read),
-	.l2arb_mem_write(write),
-	.l2arb_mem_wdata(wdata),
-	.l2arb_mem_rdata(rdata),
-	.l2arb_mem_resp(resp)
+	.l2arb_mem_address,
+	.l2arb_mem_read,
+	.l2arb_mem_write,
+	.l2arb_mem_wdata,
+	.l2arb_mem_rdata,
+	.l2arb_mem_resp
 );
 
+l2_cache l2cache
+(
+	.clk,
+	
+	/* arbiter signals */
+	.l2arb_mem_address,
+	.l2arb_mem_read,
+	.l2arb_mem_write,
+	.l2arb_mem_wdata,
+	.l2arb_mem_rdata,
+	.l2arb_mem_resp,
+	
+	/* memory signals */
+	.pmem_address(address),
+	.pmem_read(read),
+	.pmem_write(write),
+	.pmem_wdata(wdata),
+	.pmem_rdata(rdata),
+	.pmem_resp(resp)	
+);
 
 
 

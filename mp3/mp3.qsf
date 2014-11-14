@@ -36,8 +36,8 @@
 # -------------------------------------------------------------------------- #
 
 
-set_global_assignment -name FAMILY "Cyclone IV GX"
-set_global_assignment -name DEVICE EP4CGX15BF14C6
+set_global_assignment -name FAMILY "Stratix III"
+set_global_assignment -name DEVICE EP3SE50F780C2
 set_global_assignment -name TOP_LEVEL_ENTITY mp3_w_l1cache
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 13.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "00:00:00  AUGUST 25, 2014"
@@ -60,43 +60,9 @@ set_global_assignment -name EDA_TEST_BENCH_MODULE_NAME mp3_tb -section_id mp3_tb
 set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "2.5 V"
 set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
 set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
-set_global_assignment -name SDC_FILE mp3.out.sdc
-set_global_assignment -name SYSTEMVERILOG_FILE lc3b_types.sv
-set_global_assignment -name SYSTEMVERILOG_FILE mp3.sv
-set_global_assignment -name SYSTEMVERILOG_FILE cache_datapath.sv
-set_global_assignment -name SYSTEMVERILOG_FILE cache_control.sv
-set_global_assignment -name SYSTEMVERILOG_FILE demux2.sv
-set_global_assignment -name SYSTEMVERILOG_FILE decoder3to8.sv
-set_global_assignment -name SYSTEMVERILOG_FILE write_byte_to_cache.sv
-set_global_assignment -name SYSTEMVERILOG_FILE array.sv
-set_global_assignment -name SYSTEMVERILOG_FILE arbiter.sv
-set_global_assignment -name SYSTEMVERILOG_FILE arbiter_control.sv
-set_global_assignment -name SYSTEMVERILOG_FILE cpu.sv
-set_global_assignment -name SYSTEMVERILOG_FILE regfile.sv
-set_global_assignment -name SYSTEMVERILOG_FILE register.sv
-set_global_assignment -name SYSTEMVERILOG_FILE registerneg.sv
-set_global_assignment -name SYSTEMVERILOG_FILE ir.sv
-set_global_assignment -name SYSTEMVERILOG_FILE hlbyte.sv
-set_global_assignment -name SYSTEMVERILOG_FILE mux2.sv
-set_global_assignment -name SYSTEMVERILOG_FILE mux4.sv
-set_global_assignment -name SYSTEMVERILOG_FILE mux8.sv
-set_global_assignment -name SYSTEMVERILOG_FILE sext.sv
-set_global_assignment -name SYSTEMVERILOG_FILE zext.sv
-set_global_assignment -name SYSTEMVERILOG_FILE adj.sv
-set_global_assignment -name SYSTEMVERILOG_FILE zdj.sv
-set_global_assignment -name SYSTEMVERILOG_FILE gencc.sv
-set_global_assignment -name SYSTEMVERILOG_FILE plus2.sv
-set_global_assignment -name SYSTEMVERILOG_FILE cccomp.sv
-set_global_assignment -name SYSTEMVERILOG_FILE comparator.sv
-set_global_assignment -name SYSTEMVERILOG_FILE alu.sv
-set_global_assignment -name SYSTEMVERILOG_FILE adder2.sv
-set_global_assignment -name SYSTEMVERILOG_FILE control_rom.sv
-set_global_assignment -name SYSTEMVERILOG_FILE l1_cache.sv
-set_global_assignment -name SYSTEMVERILOG_FILE physical_memory.sv
 set_global_assignment -name EDA_TEST_BENCH_NAME l1_arb_tb -section_id eda_simulation
 set_global_assignment -name EDA_DESIGN_INSTANCE_NAME NA -section_id l1_arb_tb
 set_global_assignment -name EDA_TEST_BENCH_MODULE_NAME l1_arb_tb -section_id l1_arb_tb
-set_global_assignment -name SYSTEMVERILOG_FILE mp3_w_l1cache.sv
 set_global_assignment -name EDA_TEST_BENCH_RUN_SIM_FOR "1000 ns" -section_id l1_arb_tb
 set_global_assignment -name EDA_TEST_BENCH_NAME mp3_w_l1cache_tb -section_id eda_simulation
 set_global_assignment -name EDA_DESIGN_INSTANCE_NAME NA -section_id mp3_w_l1cache_tb
@@ -118,10 +84,53 @@ set_global_assignment -name EDA_TEST_BENCH_FILE physical_memory.sv -section_id m
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
 set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
-set_global_assignment -name SYSTEMVERILOG_FILE forwarding_unit.sv
 set_global_assignment -name FLOW_DISABLE_ASSEMBLER ON
 set_global_assignment -name FLOW_ENABLE_RTL_VIEWER ON
 set_global_assignment -name TIMEQUEST_MULTICORNER_ANALYSIS ON
 set_global_assignment -name SMART_RECOMPILE ON
+set_global_assignment -name DEVICE_FILTER_SPEED_GRADE 2
+set_global_assignment -name TIMEQUEST_DO_CCPP_REMOVAL ON
+set_global_assignment -name SYSTEMVERILOG_FILE mp3.sv
+set_global_assignment -name SDC_FILE mp3.out.sdc
+set_global_assignment -name SYSTEMVERILOG_FILE lc3b_types.sv
+set_global_assignment -name SYSTEMVERILOG_FILE mp3_w_l1cache.sv
+set_global_assignment -name SYSTEMVERILOG_FILE cpu.sv
+set_global_assignment -name SYSTEMVERILOG_FILE l1_cache.sv
+set_global_assignment -name SYSTEMVERILOG_FILE cache_datapath.sv
+set_global_assignment -name SYSTEMVERILOG_FILE cache_control.sv
+set_global_assignment -name SYSTEMVERILOG_FILE arbiter.sv
+set_global_assignment -name SYSTEMVERILOG_FILE arbiter_control.sv
+set_global_assignment -name SYSTEMVERILOG_FILE l2_cache.sv
+set_global_assignment -name SYSTEMVERILOG_FILE l2_cache_datapath.sv
+set_global_assignment -name SYSTEMVERILOG_FILE l2_cache_control.sv
+set_global_assignment -name SYSTEMVERILOG_FILE physical_memory.sv
+set_global_assignment -name SYSTEMVERILOG_FILE demux2.sv
+set_global_assignment -name SYSTEMVERILOG_FILE decoder3to8.sv
+set_global_assignment -name SYSTEMVERILOG_FILE write_byte_to_cache.sv
+set_global_assignment -name SYSTEMVERILOG_FILE array.sv
+set_global_assignment -name SYSTEMVERILOG_FILE regfile.sv
+set_global_assignment -name SYSTEMVERILOG_FILE register.sv
+set_global_assignment -name SYSTEMVERILOG_FILE registerneg.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ir.sv
+set_global_assignment -name SYSTEMVERILOG_FILE hlbyte.sv
+set_global_assignment -name SYSTEMVERILOG_FILE mux2.sv
+set_global_assignment -name SYSTEMVERILOG_FILE mux4.sv
+set_global_assignment -name SYSTEMVERILOG_FILE mux8.sv
+set_global_assignment -name SYSTEMVERILOG_FILE sext.sv
+set_global_assignment -name SYSTEMVERILOG_FILE zext.sv
+set_global_assignment -name SYSTEMVERILOG_FILE adj.sv
+set_global_assignment -name SYSTEMVERILOG_FILE zdj.sv
+set_global_assignment -name SYSTEMVERILOG_FILE gencc.sv
+set_global_assignment -name SYSTEMVERILOG_FILE plus2.sv
+set_global_assignment -name SYSTEMVERILOG_FILE cccomp.sv
+set_global_assignment -name SYSTEMVERILOG_FILE comparator.sv
+set_global_assignment -name SYSTEMVERILOG_FILE alu.sv
+set_global_assignment -name SYSTEMVERILOG_FILE adder2.sv
+set_global_assignment -name SYSTEMVERILOG_FILE control_rom.sv
+set_global_assignment -name SYSTEMVERILOG_FILE forwarding_unit.sv
 set_global_assignment -name SYSTEMVERILOG_FILE hazard_unit.sv
+set_global_assignment -name SYSTEMVERILOG_FILE l2_array.sv
+set_global_assignment -name SYSTEMVERILOG_FILE encoder4to2.sv
+set_global_assignment -name SYSTEMVERILOG_FILE lru_rom.sv
+set_global_assignment -name SYSTEMVERILOG_FILE lru_replace.sv
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

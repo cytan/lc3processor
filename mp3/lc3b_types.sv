@@ -21,6 +21,9 @@ typedef logic	[2:0]	lc3b_c_offset;
 typedef logic	[8:0]	lc3b_cache_tag;
 typedef logic	[127:0]	lc3b_cache_line;
 
+typedef logic	[3:0] lc3b_l2_index;
+typedef logic	[7:0] lc3b_l2_tag;
+
 /*mux select signals*/
 typedef logic	[1:0] lc3b_mux4sel;
 typedef logic	[2:0] lc3b_mux8sel;
