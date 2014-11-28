@@ -1,5 +1,6 @@
 import lc3b_types::*;
 
+
 module cpu
 (
 	input clk,
@@ -50,6 +51,10 @@ logic [1:0]			ex_sr1_sel;
 logic [1:0]			ex_sr2_sel;
 logic				mem_sr1_sel;
 logic				mem_sr2_sel;
+logic				btb_uc_out;
+logic				btb_hit_out;
+logic				pht_out;
+logic [2:0]			pcmux_sel;
 lc3b_nzp			cc_out;
 lc3b_nzp			gencc_out;
 lc3b_reg			destmux_out;
@@ -96,12 +101,21 @@ lc3b_word		ex_sr1_mux_out;
 lc3b_word		ex_sr2_mux_out;
 lc3b_word		mem_sr1_mux_out;
 lc3b_word		mem_sr2_mux_out;
+lc3b_word		btb_target_out;
+
+logic [3:0] bhr_out;
+
 
 
 lc3b_control_word		rom_out;
 lc3b_control_word		dx_ctr_out;
 lc3b_control_word		xm_ctr_out;
 lc3b_control_word		mw_ctr_out;
+
+lc3b_brp_bits			fd_brp_in;
+lc3b_brp_bits			fd_brp_out;
+lc3b_brp_bits			dx_brp_out;
+lc3b_brp_bits			xm_brp_out;
 
 /* * * * * * * * * * * * * * * */
 /* Control flow and stall unit */
@@ -127,6 +141,9 @@ assign stall_outbar = ~stall_out;
 assign direct		= ((xm_ir_out[15]^1'b1) & (xm_ir_out[13]^1'b0)) | (&xm_ir_out[15:12]);	// non-indirect load/stores have opcode 0x1x
 assign indirect 	= &(xm_ir_out[15:13] ^ 3'b010);		// 3'b101 signifies indirect instructions
 assign load_pipeline	= inst_mem_resp & (~(indirect&(~(stall_out & data_mem_resp)))) & (~(direct&(~data_mem_resp)));
+
+assign fd_brp_in.btb_hit = btb_hit_out;
+assign fd_brp_in.pht_taken = btb_uc_out | (pht_out & btb_hit_out) ;
 
 register #(.width(1))	stallreg		///////////////////////////////
 (
@@ -186,13 +203,18 @@ mux4 #(.width(2)) mbemux
 /* * * * * */
 /* PC unit */
 /* * * * * */
-mux4 pcmux
+mux8 pcmux
 (
-	.sel({BEN,xm_ctr_out.mem_jinst}),
+	//.sel({BEN,xm_ctr_out.mem_jinst}),
+	.sel(pcmux_sel),
 	.a(pcplus2_out),
 	.b(trapmux_out),
 	.c(xm_lea_out),
-	.d(xm_lea_out),
+	.d(xm_pc_out),
+	.h(btb_target_out),
+	.i(16'd0),
+	.j(16'd0),
+	.k(16'd0),
 	.f(pcmux_out)
 );
 
@@ -211,6 +233,55 @@ plus2 pcplus2
 	.out(pcplus2_out)
 );
 
+btb_datapath btb
+(
+	.clk,
+	
+	.write(	~xm_brp_out.btb_hit					&
+			load_pipeline						&		//prevent writing into btb multiple times on a pipe stall
+			((opcomp_out & (|xm_ir_out[11:9]))	|		//prevent false positives form nops
+			(xm_ir_out[11] & xm_ctr_out.mem_jinst))		// write in mem stage only if no hit in fetch stage
+			),
+	
+	//uc = unconditional
+	.uc(	(opcomp_out & (|xm_ir_out[11:9]))	&
+			(&xm_ir_out[11:9])					|
+			(xm_ir_out[11] & xm_ctr_out.mem_jinst)
+		),
+	
+	.index_fetch(pcplus2_out[3:0]), 
+	.index_mem(xm_pc_out[3:0]),
+	.tag_fetch(pcplus2_out[15:4]), 
+	.tag_mem(xm_pc_out[15:4]),
+	.target(xm_lea_out),
+	
+	.out(btb_target_out),
+	.uc_out(btb_uc_out), 
+	.hit(btb_hit_out)
+);
+
+bhr #(.width(4)) bhr
+(
+	.clk,
+	
+	.load(opcomp_out & (|xm_ir_out[11:9])),
+	.reset(1'b0),
+	.in(BEN),
+	
+	.out(bhr_out)
+);
+
+pht #(.width(7)) pht
+(
+	.clk,
+	.load(opcomp_out & (|xm_ir_out[11:9])),
+	.index_fetch({bhr_out, pcplus2_out[2:0]}),
+	.index_mem({bhr_out, xm_pc_out[2:0]}),
+	.BEN,
+	.out(pht_out)
+);
+	
+	
 /* * * * * * * * * */
 /* IF-ID registers */
 /* * * * * * * * * */
@@ -230,6 +301,15 @@ register fd_ir
 	.reset(reset_fd),
 	.in(inst_mem_rdata),
 	.out(fd_ir_out)
+);
+
+register #(.width($bits(lc3b_brp_bits))) fd_brp
+(
+	.clk,
+	.load(load_fd),
+	.reset(reset_fd),
+	.in(fd_brp_in),
+	.out(fd_brp_out)
 );
 
 /* * * * * * * * * * */
@@ -317,6 +397,14 @@ register dx_ir
 	.out(dx_ir_out)
 );
 
+register #(.width($bits(lc3b_brp_bits))) dx_brp
+(
+	.clk,
+	.load(load_dx),
+	.reset(reset_dx),
+	.in(fd_brp_out),
+	.out(dx_brp_out)
+);
 /* * * * * * * * * * * */
 /* execute stage unit  */
 /* * * * * * * * * * * */
@@ -462,6 +550,15 @@ register xm_ir
 	.reset(reset_xm),
 	.in(dx_ir_out),
 	.out(xm_ir_out)
+);
+
+register #(.width($bits(lc3b_brp_bits))) xm_brp
+(
+	.clk,
+	.load(load_xm),
+	.reset(reset_xm),
+	.in(dx_brp_out),
+	.out(xm_brp_out)
 );
 
 /* * * * * * * * * * */
@@ -672,11 +769,17 @@ hazard_unit hazard_unit
 	.reset_xm(hazard_reset_xm),
 	.load_mw(hazard_load_mw),
 	.reset_mw(hazard_reset_mw),
+	.pcmux_sel,
 	.mem_jinst(xm_ctr_out.mem_jinst),
 	.ex_d_read(dx_ctr_out.data_mem_read),
 	.ex_d_readi(dx_ctr_out.data_mem_readi),
 	.ex_d_writei(dx_ctr_out.data_mem_writei),
 	.BEN,
+	.btb_hit(btb_hit_out),
+	.btb_uc(btb_uc_out),
+	.pht_out,
+	.xm_btb_hit(xm_brp_out.btb_hit),
+	.xm_pht_taken(xm_brp_out.pht_taken),
 	.ex_dest(dx_ir_out[11:9]),
 	.id_sr1(fd_ir_out[8:6]),
 	.id_sr2(fd_ir_out[2:0])

@@ -4,7 +4,7 @@
 
 # Quartus II workspace file
 mp?/*.qws
-
+mp?/*.qsf
 # Nativelink reports
 mp?/*_nativelink_simulation.rpt
 
