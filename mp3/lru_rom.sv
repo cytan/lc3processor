@@ -12,7 +12,7 @@ begin
 	case(lru)
 		3'b000: begin
 			case({h0,h1,h2,h3})
-				4'b1000:	next_lru = 3'b110;
+				4'b1000: next_lru = 3'b110;
 				4'b0100: next_lru = 3'b100;
 				4'b0010: next_lru = 3'b001;
 				4'b0001: next_lru = 3'b000;

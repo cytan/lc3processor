@@ -29,6 +29,13 @@ typedef logic	[1:0] lc3b_mux4sel;
 typedef logic	[2:0] lc3b_mux8sel;
 typedef logic	[2:0] lc3b_dec3sel;
 
+/*branch prediction signals*/
+typedef struct packed
+{
+	logic btb_hit;
+	logic pht_taken;
+} lc3b_brp_bits;
+
 typedef enum bit [3:0] {
     op_add  = 4'b0001,
     op_and  = 4'b0101,
