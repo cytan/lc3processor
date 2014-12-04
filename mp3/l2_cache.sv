@@ -16,8 +16,8 @@ module l2_cache
 	output lc3b_word		pmem_address,
 	output logic			pmem_read,
 	output logic 			pmem_write,
-	output lc3b_cache_line	pmem_wdata,
-	input lc3b_cache_line	pmem_rdata,
+	output lc3b_256	pmem_wdata,
+	input lc3b_256	pmem_rdata,
 	input 					pmem_resp	
 );
 
@@ -26,10 +26,12 @@ module l2_cache
 			wr_da0, wr_da1, wr_da2, wr_da3,		// data array load signals
 			wr_dba0, wr_dba1, wr_dba2, wr_dba3,	// dirty bit array load signals
 			wr_lru,									// LRU bit array load signal
+			wr_prefreg,
 			dba_in, dirty,
 			hit, h0, h1, h2, h3,					// one-hot hit bit
 			r0, r1, r2, r3;						// one-hot replace bit
 	
+	logic		prefmux_sel;
 	logic 	din_sel;
 	logic 	addrmux_sel;
 	lc3b_2bit	hit_num;
@@ -66,6 +68,7 @@ l2_cache_datapath l2_datapath
 	.wr_dba2,
 	.wr_dba3,
 	.wr_lru,
+	.wr_prefreg,
 	
 	.dba_in,
 	.dirty,
@@ -78,6 +81,7 @@ l2_cache_datapath l2_datapath
 	.r1,
 	.r2,
 	.r3,
+	.prefmux_sel,
 	.din_sel,
 	.addrmux_sel,
 	.hit_num,
@@ -96,6 +100,7 @@ l2_cache_control l2_control
 	.pmem_read,
 	.pmem_write,
 	.pmem_resp,
+	.pref(l2arb_mem_address[5]),
 	
 	/* cache internal signals */
 	.wr_va0,
@@ -115,6 +120,7 @@ l2_cache_control l2_control
 	.wr_dba2,
 	.wr_dba3,
 	.wr_lru,
+	.wr_prefreg,
 	
 	.dba_in,
 	.dirty,
@@ -127,6 +133,7 @@ l2_cache_control l2_control
 	.r1,
 	.r2,
 	.r3,
+	.prefmux_sel,
 	.din_sel,
 	.addrmux_sel,
 	.hit_num,

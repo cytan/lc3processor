@@ -7,10 +7,10 @@ module mp3_w_l1cache
     /* Memory signals */
 	output 					read, write,
 	output lc3b_word 		address,
-	output lc3b_cache_line 	wdata,
+	output lc3b_256 	wdata,
 	
 	input 					resp,
-	input lc3b_cache_line 	rdata
+	input lc3b_256 	rdata
 );
 
 logic 						inst_mem_resp;

@@ -16,12 +16,13 @@ typedef logic	[2:0]	lc3b_nzp;
 typedef logic	[1:0]	lc3b_mem_wmask;
 
 /* cache types */
-typedef logic	[2:0]	lc3b_c_index;
-typedef logic	[2:0]	lc3b_c_offset;
-typedef logic	[8:0]	lc3b_cache_tag;
+typedef logic	[3:0]		lc3b_c_index;
+typedef logic	[2:0]		lc3b_c_offset;
+typedef logic	[7:0]		lc3b_cache_tag;
 typedef logic	[127:0]	lc3b_cache_line;
+typedef logic	[255:0]	lc3b_256;
 
-typedef logic	[3:0] lc3b_l2_index;
+typedef logic	[2:0] lc3b_l2_index;
 typedef logic	[7:0] lc3b_l2_tag;
 
 /*mux select signals*/

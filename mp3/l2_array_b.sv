@@ -1,11 +1,11 @@
 import lc3b_types::*;
 
-module array #(parameter width = 128)
+module l2_array_b #(parameter width = 128)
 (
     input clk,
     input write,
-    input lc3b_c_index index,
-    input [width-1:0] datain,
+    input logic [3:0] index,
+    input logic [width-1:0] datain,
     output logic [width-1:0] dataout
 );
 
@@ -30,4 +30,4 @@ end
 
 assign dataout = data[index];
 
-endmodule : array
+endmodule : l2_array_b

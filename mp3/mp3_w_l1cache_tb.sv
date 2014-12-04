@@ -6,7 +6,7 @@ timeprecision 1ns;
 logic clk;
 logic read, write, resp;
 logic [15:0] address;
-logic [127:0] wdata, rdata;
+logic [255:0] wdata, rdata;
 
 /* Clock generator */
 initial clk = 0;

@@ -61,7 +61,7 @@ lru_rom lrurom
 	.next_lru
 );
 
-l2_array #(.width(3)) lru
+l2_array_b #(.width(3)) lru
 (
 	.clk,
 	.write(wr_lru),

@@ -16,19 +16,10 @@ SEGMENT	CodeSegment:
 ;;	All registors assumed to contain zero, due to microarchitecture
 	LDR	R2, R0, INPUT	; R1 <- M[INPUT]
 	LDR	R1, R0, NEG1
-	NOP
-	NOP
 	ADD	R5, R1, R2	; initialize loop counters to be INPUT-2
-	NOP
-	NOP
 	ADD	R5, R1, R5	;
-	NOP
-	NOP
 	ADD	R4, R0, R5	;
 	BRnzp	NEXT
-	NOP
-	NOP
-	NOP
 
 INPUT:	DATA2	4x0005		; input can be altered
 NEG1:	DATA2	4xFFFF
@@ -36,33 +27,17 @@ RESULT:	DATA2	4x0000
 
 NEXT:
 	BRnz	FINISH
-	NOP
-	NOP
-	NOP
 OUTLOOP:
 	ADD	R3, R0, R2	; update adder
-	NOP
-	NOP
 INLOOP:
 	ADD	R2, R2, R3
 	ADD	R5, R1, R5	; decrement innerloop counter
 	BRp	INLOOP
-	NOP
-	NOP
-	NOP
 	ADD	R4, R1, R4	; update loop counters
-	NOP
-	NOP
 	ADD	R5, R0, R4	;
 	BRp	OUTLOOP
-	NOP
-	NOP
-	NOP
 FINISH:	
 	STR	R2, R0, RESULT
 HALT:
 	BRnzp	HALT		; end in infinite loop
-	NOP
-	NOP
-	NOP
 

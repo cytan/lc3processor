@@ -46,12 +46,18 @@ lc3b_cache_line da0_out, da1_out;
 lc3b_cache_line dawmux_out,
 					 datamux_out,
 					 data_write;
+					 
+lc3b_c_index		addr_index;
+lc3b_cache_tag		addr_tag;
 
+assign addr_tag 	= mem_address[15:8];
+assign addr_index	= mem_address[7:4];
+					 
 array #(.width(1)) valid_bit_array_0
 (
 	.clk,
 	.write(va0_w),
-	.index(mem_address[6:4]),
+	.index(addr_index),
 	.datain(1'b1),
 	.dataout(vba0_out)
 );
@@ -60,26 +66,26 @@ array #(.width(1)) valid_bit_array_1
 (
 	.clk,
 	.write(va1_w),
-	.index(mem_address[6:4]),
+	.index(addr_index),
 	.datain(1'b1),
 	.dataout(vba1_out)
 );
 
-array #(.width(9)) tag_array_0
+array #(.width(8)) tag_array_0
 (
 	.clk,
 	.write(ta0_w),
-	.index(mem_address[6:4]),
-	.datain(mem_address[15:7]),
+	.index(addr_index),
+	.datain(addr_tag),
 	.dataout(ta0_out)
 );
 
-array #(.width(9)) tag_array_1
+array #(.width(8)) tag_array_1
 (
 	.clk,
 	.write(ta1_w),
-	.index(mem_address[6:4]),
-	.datain(mem_address[15:7]),
+	.index(addr_index),
+	.datain(addr_tag),
 	.dataout(ta1_out)
 );
 
@@ -87,7 +93,7 @@ array data_array_0
 (
 	.clk,
 	.write(da0_w),
-	.index(mem_address[6:4]),
+	.index(addr_index),
 	.datain(dawmux_out),
 	.dataout(da0_out)
 );
@@ -96,7 +102,7 @@ array data_array_1
 (
 	.clk,
 	.write(da1_w),
-	.index(mem_address[6:4]),
+	.index(addr_index),
 	.datain(dawmux_out),
 	.dataout(da1_out)
 );
@@ -105,7 +111,7 @@ array #(.width(1)) dirty_bit_array_0
 (
 	.clk,
 	.write(dba0_w),
-	.index(mem_address[6:4]),
+	.index(addr_index),
 	.datain(dba_in),
 	.dataout(dba0_out)
 );
@@ -114,7 +120,7 @@ array #(.width(1)) dirty_bit_array_1
 (
 	.clk,
 	.write(dba1_w),
-	.index(mem_address[6:4]),
+	.index(addr_index),
 	.datain(dba_in),
 	.dataout(dba1_out)
 );
@@ -123,21 +129,21 @@ array #(.width(1)) lru_array
 (
 	.clk,
 	.write(la_w),
-	.index(mem_address[6:4]),
+	.index(addr_index),
 	.datain(lru_in),
 	.dataout(lru_out)
 );
 
-comparator #(.width(9)) tag_comp0
+comparator #(.width(8)) tag_comp0
 (
-	.a(mem_address[15:7]),
+	.a(addr_tag),
 	.b(ta0_out),
 	.f(comp0_out)
 );
 
-comparator #(.width(9)) tag_comp1
+comparator #(.width(8)) tag_comp1
 (
-	.a(mem_address[15:7]),
+	.a(addr_tag),
 	.b(ta1_out),
 	.f(comp1_out)
 );
@@ -185,8 +191,8 @@ mux4 #(.width(16)) addrmux
 (
 	.sel(addrmux_sel),
 	.a(mem_address),
-	.b({ta0_out, mem_address[6:0]}),
-	.c({ta1_out, mem_address[6:0]}),
+	.b({ta0_out, mem_address[7:0]}),
+	.c({ta1_out, mem_address[7:0]}),
 	.d(16'b0),
 	.f(arb_mem_address)
 );
